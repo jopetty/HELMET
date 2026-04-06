@@ -71,8 +71,8 @@ def run_test(args, model, dataset, test_file, demo_file):
         args.input_max_length += 32768
         model.max_length = args.input_max_length
         model.generation_max_length = args.generation_max_length
-        args.stop_newline = False
-        logger.info(f"thinking mode, adding 32k tokens to generation and input max length, also disabling stop_newline")
+        args.stop_new_line = False
+        logger.info(f"thinking mode, adding 32k tokens to generation and input max length, also disabling stop_new_line")
 
     logger.info("Running generation...")
     start_time = time.time()

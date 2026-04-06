@@ -66,7 +66,7 @@ MODEL_NAME="${OD[$IDX]}"
 OUTPUT_DIR="output/$(basename $MODEL_NAME)"
 
 # for the API models we always use use_chat_template=True
-OPTIONS="--use_chat_template True --stop_newline False"
+OPTIONS="--use_chat_template True --stop_new_line False"
 
 echo "Evaluation output dir         = $OUTPUT_DIR"
 echo "Tag                           = $TAG"
