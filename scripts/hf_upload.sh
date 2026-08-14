@@ -8,9 +8,11 @@
 # the file content at those paths.
 #
 # Usage: bash hf_upload.sh   (no arguments)
-# Requires: uv (https://docs.astral.sh/uv/) and `uv run hf auth login` first.
-# huggingface_hub (which ships the `hf` CLI) is a project dependency, so
-# `uv run hf ...` resolves to the project's synced environment.
+# Requires: uv (https://docs.astral.sh/uv/), and either a HF_TOKEN (or
+# HUGGING_FACE_HUB_TOKEN) in a .env file at the repo root, or having already
+# run `uv run hf auth login`. huggingface_hub (which ships the `hf` CLI) is a
+# project dependency, so `uv run hf ...` resolves to the project's synced
+# environment.
 set -euo pipefail
 
 REPO_ID="allenai/helmet-plus"
@@ -27,8 +29,16 @@ if ! command -v uv &> /dev/null; then
   exit 1
 fi
 
+if [ -f .env ]; then
+  echo "Loading .env..."
+  set -a
+  source .env
+  set +a
+fi
+
 if ! uv run hf auth whoami &> /dev/null; then
-  echo "error: not logged in to the Hub. Run 'uv run hf auth login' first." >&2
+  echo "error: not logged in to the Hub, and no working HF_TOKEN found." >&2
+  echo "       Either put HF_TOKEN=hf_... in a .env file at the repo root, or run 'uv run hf auth login'." >&2
   exit 1
 fi
 
