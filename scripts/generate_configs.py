@@ -228,6 +228,7 @@ def process_configs(config_name, datasets, input_lengths, **kwargs):
             **kwargs,
             "model_name_or_path": "meta-llama/Llama-3.1-8B-Instruct",
         })
+    Path(config_name).parent.mkdir(parents=True, exist_ok=True)
     with open(config_name, "w") as f:
         yaml.dump(out_config, f, sort_keys=False)
 
