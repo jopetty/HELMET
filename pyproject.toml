@@ -18,6 +18,7 @@ dependencies = [
     "openai",
     "orjson",
     "huggingface_hub", # ships the `hf` CLI directly; no extra needed on current releases
+    "gigatoken>=0.10.0",
 ]
 
 [tool.uv]

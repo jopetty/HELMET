@@ -36,6 +36,14 @@ wins are a cheaper random-hex-string generator (below) and parallelizing
 across examples (each example is independent given its seed), not swapping
 the JSON library. orjson is used opportunistically anyway since it's a free
 win with no downside, but don't expect it to matter much on its own.
+
+Calibration tokenizes near-target-length strings repeatedly (a probe plus a
+short binary search), which dominates wall time once generation itself is
+parallelized -- at the 2m tier, calibration alone took ~7s with plain
+`transformers`. gigatoken (https://github.com/marcelroed/gigatoken) wraps
+the loaded HF tokenizer for this hot path: verified byte-identical token ids
+against `transformers` at every tier we use (up to 2m), ~150-250x faster in
+this workload, dropping that 2m-tier calibration to ~0.2s.
 """
 import argparse
 import hashlib
@@ -117,7 +125,7 @@ def _generate_line(task):
 
 
 def count_tokens(tokenizer, text):
-    return len(tokenizer(text)["input_ids"])
+    return len(tokenizer.encode(text))
 
 
 def calibrate_num_kvs(tokenizer, target_length, seed, tolerance=0.02, probe_n=500):
@@ -166,7 +174,12 @@ def main():
     args = parser.parse_args()
 
     from transformers import AutoTokenizer
-    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
+    import gigatoken
+
+    # AutoTokenizer stays the loader (handles whatever --tokenizer is passed);
+    # gigatoken just wraps it for the repeated encode() calls calibration does --
+    # verified exact-match token ids against the plain HF tokenizer beforehand
+    tokenizer = gigatoken.Tokenizer(AutoTokenizer.from_pretrained(args.tokenizer))
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
