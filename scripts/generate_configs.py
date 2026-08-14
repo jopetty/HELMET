@@ -7,10 +7,13 @@ import yaml
 
 lengths_mapping = {"4k": 4096, "8k": 8192, "16k": 16384, "32k": 32768, "64k": 65536, "128k": 131072}
 
-# lengths beyond the official 128k data release; only synthetic tasks (currently just json_kv,
-# generated on demand by scripts/generate_json_kv_data.py) can actually be extended this far --
-# see that script's docstring for why the real-document and retrieval-based tasks can't be.
-long_lengths_mapping = {"256k": 262144, "512k": 524288, "1m": 1048576, "2m": 2097152}
+# the full 4k-2m range generated fresh for json_kv (the only non-RULER synthetic task
+# extended this far -- see generate_json_kv_data.py's docstring for why the real-document
+# and retrieval-based tasks can't be) by scripts/generate_json_kv_data.py. Merges the
+# standard 4k-128k tiers with the 256k-2m ones added for the long-context extension, so
+# the whole sweep is calibrated against one tokenizer instead of splicing in the official
+# pre-baked 4k-128k data (which was calibrated separately, against a different tokenizer).
+long_lengths_mapping = {**lengths_mapping, "256k": 262144, "512k": 524288, "1m": 1048576, "2m": 2097152}
 master_mapping = {
     # ruler tasks, shots: 0, use_chat_template: False, and stop_new_line: False
     "ruler_niah_s_1": { # NIAH Repeat

@@ -1,6 +1,10 @@
-"""Generate synthetic JSON key-value retrieval data for context lengths beyond
-what's in the official HELMET data release (which tops out at 128k, see
-`data/json_kv/test_k1800_dep6.jsonl` referenced from `configs/recall.yaml`).
+"""Generate synthetic JSON key-value retrieval data, for the standard 4k-128k
+HELMET tiers as well as the 256k-2m ones added for this long-context
+extension. Regenerating 4k-128k here too (rather than relying on the
+official pre-baked data, e.g. `data/json_kv/test_k1800_dep6.jsonl` referenced
+from `configs/recall.yaml`) keeps the whole sweep calibrated against one
+tokenizer instead of splicing together two different ones at the 128k/256k
+seam.
 
 This reproduces the same synthetic task (`load_json_kv` in `data.py`, based on
 https://github.com/nelson-liu/lost-in-the-middle): a JSON object made of
@@ -19,7 +23,7 @@ converges quickly, even at multi-million-token lengths).
 
 Usage:
     python scripts/generate_json_kv_data.py \\
-        --lengths 262144 524288 1048576 2097152 \\
+        --lengths 4096 8192 16384 32768 65536 131072 262144 524288 1048576 2097152 \\
         --num_examples 200 \\
         --tokenizer allenai/Olmo-3-1025-7B \\
         --output_dir data/json_kv \\
