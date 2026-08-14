@@ -47,22 +47,21 @@ See `CHANGELOG.md` for updates and more details.
 
 ## Setup
 
-Please install the necessary packages with (using a virtual environment is recommended, tested with python 3.11):
+Dependencies are managed with [uv](https://docs.astral.sh/uv/) (tested with python 3.11, pinned in `.python-version`). Install uv, then sync the environment from `pyproject.toml`/`uv.lock`:
 ```bash
-python -m venv env
-source env/bin/activate
-pip install -r requirements.txt
+uv sync
 ```
+Prefix any command that needs the project's packages with `uv run` (e.g. `uv run python eval.py ...`) -- it syncs the environment automatically, no manual venv activation needed. All the scripts under `scripts/` already do this.
 
 For evaluating on NVIDIA GPUs, please install `flash-attn` by referring to the [flash attention repo](https://github.com/Dao-AILab/flash-attention).
 
-Additionally, if you wish to use the API models, you will need to install the package corresponding to the API you wish to use
+Additionally, if you wish to use the API models, you will need to add the package corresponding to the API you wish to use
 ```bash
-pip install openai # OpenAI API (GPT)
-pip install anthropic==0.42.0 # Anthropic API (Claude)
-pip install google-generativeai # Google API (Gemini)
-pip install vertexai==1.71.0 # Google API (Gemini)
-pip install together # Together API
+uv add openai # OpenAI API (GPT)
+uv add anthropic==0.42.0 # Anthropic API (Claude)
+uv add google-generativeai # Google API (Gemini)
+uv add vertexai==1.71.0 # Google API (Gemini)
+uv add together # Together API
 ```
 You should also set the environmental variables accordingly so the API calls can be made correctly. To see the variable that you should set up, check out `model_utils.py` and the corresponding class (e.g., `GeminiModel`).
 
@@ -207,7 +206,7 @@ For example:
  - You may also specify which set of models to run with `MNAME="${S_MODELS[$M_IDX]}"` or `MNAME="${L_MODELS[$M_IDX]}"` for the short and long models respectively.
  - `--gres=gpu:1` specifies the number of GPUs you want to use, for the larger models, you may need more GPUs (we use up to 8x80GB GPUs).
  - `--mail-user` specifies the email address to send the job status to.
- - `source env/bin/activate` specifies the virtual environment to use.
+ - `uv run` before each `python` call syncs and uses the project's environment; run `uv sync` once beforehand if the cluster node has no network access when the job starts.
  - `MODEL_NAME="/path/to/your/model/$MNAME"` you should specify the path to your model here.
 
 </details>

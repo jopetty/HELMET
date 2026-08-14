@@ -38,7 +38,7 @@ echo "Array Job ID                   = $SLURM_ARRAY_JOB_ID"
 echo "Array Task ID                  = $SLURM_ARRAY_TASK_ID"
 echo "Cache                          = $TRANSFORMERS_CACHE"
 
-source env/bin/activate
+# uv run syncs the environment from pyproject.toml/uv.lock automatically
 
 IDX=$SLURM_ARRAY_TASK_ID
 NGPU=$SLURM_GPUS_ON_NODE
@@ -134,7 +134,7 @@ echo "Options                       = $OPTIONS"
 for CONFIG in "${CONFIGS[@]}"; do
     echo "Config file: $CONFIG"
 
-    python eval.py \
+    uv run python eval.py \
         --config configs/$CONFIG \
         --seed $SEED \
         --output_dir $OUTPUT_DIR \

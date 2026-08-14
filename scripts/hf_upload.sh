@@ -8,7 +8,9 @@
 # the file content at those paths.
 #
 # Usage: bash hf_upload.sh   (no arguments)
-# Requires: pip install -U "huggingface_hub[cli]"  and  hf auth login
+# Requires: uv (https://docs.astral.sh/uv/) and `uv run hf auth login` first.
+# huggingface_hub (which ships the `hf` CLI) is a project dependency, so
+# `uv run hf ...` resolves to the project's synced environment.
 set -euo pipefail
 
 REPO_ID="allenai/helmet-plus"
@@ -20,13 +22,13 @@ MANIFEST_DEST="json_kv/manifest.json"
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-if ! command -v hf &> /dev/null; then
-  echo "error: the 'hf' CLI is not installed. Install it with: pip install -U 'huggingface_hub[cli]'" >&2
+if ! command -v uv &> /dev/null; then
+  echo "error: uv is not installed. See https://docs.astral.sh/uv/getting-started/installation/" >&2
   exit 1
 fi
 
-if ! hf auth whoami &> /dev/null; then
-  echo "error: not logged in to the Hub. Run 'hf auth login' first." >&2
+if ! uv run hf auth whoami &> /dev/null; then
+  echo "error: not logged in to the Hub. Run 'uv run hf auth login' first." >&2
   exit 1
 fi
 
@@ -36,14 +38,14 @@ if [ ! -d "$DATA_DIR/json_kv" ]; then
 fi
 
 echo "Uploading $DATA_DIR/json_kv/ -> $REPO_ID ($REPO_TYPE)..."
-hf upload-large-folder "$REPO_ID" "$DATA_DIR" \
+uv run hf upload-large-folder "$REPO_ID" "$DATA_DIR" \
   --repo-type "$REPO_TYPE" \
   --include "$DATA_INCLUDE" \
   --private
 
 if [ -f "$MANIFEST" ]; then
   echo "Uploading $MANIFEST -> $REPO_ID/$MANIFEST_DEST..."
-  hf upload "$REPO_ID" "$MANIFEST" "$MANIFEST_DEST" \
+  uv run hf upload "$REPO_ID" "$MANIFEST" "$MANIFEST_DEST" \
     --repo-type "$REPO_TYPE" \
     --commit-message "Update json_kv manifest"
 else

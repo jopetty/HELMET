@@ -1,0 +1,24 @@
+[project]
+name = "helmet"
+version = "0.1.0"
+description = "HELMET: How to Evaluate Long-context Language Models Effectively and Thoroughly"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "wheel",
+    "ninja",
+    "packaging",
+    "torch",
+    "datasets",
+    "transformers",
+    "accelerate",
+    "sentencepiece",
+    "pytrec_eval",
+    "rouge_score",
+    "openai",
+    "orjson",
+    "huggingface_hub", # ships the `hf` CLI directly; no extra needed on current releases
+]
+
+[tool.uv]
+package = false
