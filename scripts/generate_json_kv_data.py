@@ -21,7 +21,7 @@ Usage:
     python scripts/generate_json_kv_data.py \\
         --lengths 262144 524288 1048576 2097152 \\
         --num_examples 200 \\
-        --tokenizer NousResearch/Llama-2-7b-hf \\
+        --tokenizer allenai/Olmo-3-1025-7B \\
         --output_dir data/json_kv \\
         --manifest configs/json_kv_long_manifest.json \\
         --workers 16
@@ -158,7 +158,7 @@ def main():
     parser.add_argument("--lengths", type=int, nargs="+", required=True, help="target input lengths in tokens, e.g. 262144 524288 1048576 2097152 4194304")
     parser.add_argument("--num_examples", type=int, default=200, help="number of test examples per length")
     parser.add_argument("--num_demos", type=int, default=10, help="number of few-shot demo kv pairs to attach to each example")
-    parser.add_argument("--tokenizer", type=str, default="NousResearch/Llama-2-7b-hf", help="tokenizer used to calibrate num_kvs to the target length; mirrors the meta-llama/Llama-2-7b-hf tokenizer used elsewhere in this repo (see truncate_llama2 in data.py) without requiring gated access")
+    parser.add_argument("--tokenizer", type=str, default="allenai/Olmo-3-1025-7B", help="tokenizer used to calibrate num_kvs to the target length; the target model for this long-context extension is Olmo 3, so lengths are calibrated against its tokenizer rather than the Llama-2 one used elsewhere in this repo (see truncate_llama2 in data.py)")
     parser.add_argument("--output_dir", type=str, default="data/json_kv")
     parser.add_argument("--manifest", type=str, default="configs/json_kv_long_manifest.json")
     parser.add_argument("--seed", type=int, default=42)

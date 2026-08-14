@@ -13,7 +13,8 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 python scripts/generate_json_kv_data.py \
   --lengths 262144 524288 1048576 2097152 \
-  --num_examples 200
+  --num_examples 200 \
+  --tokenizer allenai/Olmo-3-1025-7B
 
 python scripts/generate_configs.py
 
