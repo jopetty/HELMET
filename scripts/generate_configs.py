@@ -1,8 +1,16 @@
+import json
+from pathlib import Path
+
 import yaml
 
 # cannot be shared ones: use_chat_template, shots, and stop_new_line
 
 lengths_mapping = {"4k": 4096, "8k": 8192, "16k": 16384, "32k": 32768, "64k": 65536, "128k": 131072}
+
+# lengths beyond the official 128k data release; only synthetic tasks (currently just json_kv,
+# generated on demand by scripts/generate_json_kv_data.py) can actually be extended this far --
+# see that script's docstring for why the real-document and retrieval-based tasks can't be.
+long_lengths_mapping = {"256k": 262144, "512k": 524288, "1m": 1048576, "2m": 2097152}
 master_mapping = {
     # ruler tasks, shots: 0, use_chat_template: False, and stop_new_line: False
     "ruler_niah_s_1": { # NIAH Repeat
@@ -294,6 +302,39 @@ def separate_configs(input_lengths = ["128k"], fname_postfix = ""):
         )
     
 
+def long_context_configs(manifest_path="configs/json_kv_long_manifest.json"):
+    # extends json_kv (the only non-RULER synthetic task) out to 2m tokens.
+    # the other synthetic tasks are RULER variants, which are handled separately.
+    # requires running scripts/generate_json_kv_data.py first, which writes the
+    # manifest this reads (num_kvs has to be calibrated against a real tokenizer,
+    # so it can't be hardcoded here the way the 4k-128k lengths_mapping values are).
+    if not Path(manifest_path).exists():
+        print(f"skipping long-context configs: {manifest_path} not found, run scripts/generate_json_kv_data.py first")
+        return
+
+    with open(manifest_path) as f:
+        manifest = json.load(f)
+
+    input_lengths = [k for k in long_lengths_mapping if k in manifest]
+    if not input_lengths:
+        print(f"skipping long-context configs: {manifest_path} has no entries matching long_lengths_mapping")
+        return
+
+    for k in input_lengths:
+        entry = manifest[k]
+        master_mapping["json_kv"][k] = {
+            "input_length": entry["input_length"],
+            "generation_max_length": 100,
+            "test_files": entry["test_file"],
+            "demo_files": "",
+        }
+
+    process_configs(
+        "configs/recall_long.yaml", ["json_kv"], input_lengths,
+        use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False
+    )
+
+
 def niah_configs():
     input_lengths = [8192, 16384, 32768, 65536, 131072]
     dataset=["ruler_niah_s_2"]
@@ -316,3 +357,4 @@ if __name__ == "__main__":
     niah_configs()
     separate_configs()
     separate_configs(input_lengths=["8k", "16k", "32k", "64k"], fname_postfix="_short")
+    long_context_configs()
